@@ -1,0 +1,217 @@
+version: 2
+
+models:
+  - name: stg_ecommerce__customers
+    description: "Cleaned customer profile records."
+    columns:
+      - name: customer_id
+        data_tests:
+          - unique
+          - not_null
+      - name: email
+        data_tests:
+          - not_null
+
+  - name: stg_ecommerce__products
+    description: "Product catalog listing."
+    columns:
+      - name: product_id
+        data_tests:
+          - unique
+          - not_null
+      - name: unit_price
+        data_tests:
+          - not_null
+
+  - name: stg_ecommerce__orders
+    description: "Header-level order records."
+    columns:
+      - name: order_id
+        data_tests:
+          - unique
+          - not_null
+      - name: customer_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_ecommerce__customers')
+              field: customer_id
+      - name: order_status
+        data_tests:
+          - accepted_values:
+              values: ['pending', 'cancelled', 'returned', 'delivered']
+
+  - name: stg_ecommerce__order_items
+    description: "Granular line-item details per order."
+    columns:
+      - name: order_item_id
+        data_tests:
+          - unique
+          - not_null
+      - name: order_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_ecommerce__orders')
+              field: order_id
+      - name: product_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_ecommerce__products')
+              field: product_id
+            
+  - name: int_orders_joined_items
+    description: "Header-level order records with aggregated line-item metrics (item counts, gross amount, discounts, net amount)."
+    columns:
+      - name: order_id
+        description: "Primary key. One record per order."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: customer_id
+        description: "Foreign key referencing the customer."
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_ecommerce__customers')
+              field: customer_id
+
+      - name: order_status
+        description: "Lifecycle status of the order."
+        data_tests:
+          - not_null
+
+      - name: order_date
+        description: "Calendar date the order was placed."
+        data_tests:
+          - not_null
+
+      - name: total_items
+        description: "Total quantity of line items in the order."
+        data_tests:
+          - not_null
+
+      - name: gross_order_amount
+        description: "Sum of line-item unit prices before discounts."
+        data_tests:
+          - not_null
+
+      - name: total_order_discount
+        description: "Sum of discounts applied to the order."
+        data_tests:
+          - not_null
+
+      - name: net_order_amount
+        description: "Final net revenue amount (gross_order_amount - total_order_discount)."
+        data_tests:
+          - not_null
+
+  # 1. FACT ORDERS
+  - name: fct_orders
+    description: "Header-level order fact table containing financial metrics, line item totals, and delivery turnaround times."
+    columns:
+      - name: order_key
+        description: "Surrogate primary key generated from order_id."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: order_id
+        description: "Natural key / Business ID for the order."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: customer_id
+        description: "Foreign key referencing dim_customers."
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_id
+
+      - name: order_status
+        description: "Order lifecycle status."
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['pending', 'cancelled', 'returned', 'delivered']
+
+      - name: order_date
+        description: "Calendar date the order was created."
+        data_tests:
+          - not_null
+
+      - name: net_order_amount
+        description: "Final net revenue amount after discounts."
+        data_tests:
+          - not_null
+
+  # 2. DIMENSION CUSTOMERS
+  - name: dim_customers
+    description: "Customer dimension table with profile details and aggregated lifetime spend metrics."
+    columns:
+      - name: customer_key
+        description: "Surrogate primary key generated from customer_id."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: customer_id
+        description: "Natural key / Business ID for the customer."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: email
+        description: "Customer email address."
+        data_tests:
+          - not_null
+
+      - name: signup_date
+        description: "Date the customer account was created."
+        data_tests:
+          - not_null
+
+      - name: total_orders
+        description: "Lifetime count of non-cancelled orders."
+        data_tests:
+          - not_null
+
+      - name: lifetime_spend
+        description: "Lifetime cumulative net spend."
+        data_tests:
+          - not_null
+
+  # 3. DIMENSION PRODUCTS
+  - name: dim_products
+    description: "Product catalog dimension table detailing category rollups and baseline prices."
+    columns:
+      - name: product_key
+        description: "Surrogate primary key generated from product_id."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: product_id
+        description: "Natural key / Business ID for the product."
+        data_tests:
+          - unique
+          - not_null
+
+      - name: product_name
+        description: "Name of the product."
+        data_tests:
+          - not_null
+
+      - name: product_category
+        description: "Top-level category classification."
+        data_tests:
+          - not_null
+
+      - name: unit_price
+        description: "Standard catalog price per unit."
+        data_tests:
+          - not_null

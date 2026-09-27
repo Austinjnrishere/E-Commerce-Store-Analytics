@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+  - name: ecommerce_source
+    description: "Raw landed transactional data for E-Commerce orders."
+    database: ECOMMERCE_DB
+    schema: ECOMMERCE_SCHEMA
+    tables:
+      - name: CUSTOMERS
+      - name: PRODUCTS
+      - name: ORDERS
+      - name: ORDER_ITEMS
