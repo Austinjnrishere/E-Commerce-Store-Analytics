@@ -19,13 +19,13 @@ This pipeline cleans landed transactional tables and applies dimensional modelin
 
 [ Snowflake RAW Schema ]
 │
-├── RAW_CUSTOMERS ──► stg_ecommerce__customers ───────────────┐
+├── CUSTOMERS ──► stg_ecommerce__customers ───────────────┐
 │                                                              │
-├── RAW_PRODUCTS  ──► stg_ecommerce__products  ─────────┐     │
+├── PRODUCTS  ──► stg_ecommerce__products  ─────────┐     │
 │                                                        │     │
-├── RAW_ORDER_ITEMS ─► stg_ecommerce__order_items ┐      │     │
+├── ORDER_ITEMS ─► stg_ecommerce__order_items ┐      │     │
 │                                                 │      │     │
-└── RAW_ORDERS ──────► stg_ecommerce__orders ─────┴┐     │     │
+└── ORDERS ──────► stg_ecommerce__orders ─────┴┐     │     │
 │     │     │
 ▼     ▼     ▼
 int_orders_joined_items │
