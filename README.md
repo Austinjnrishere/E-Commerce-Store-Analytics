@@ -80,3 +80,10 @@ pip install dbt-core==1.9.4 dbt-snowflake==1.9.4
 
 # Install project dependencies (dbt-utils)
 dbt deps
+
+
+🔗 **Live Interactive dbt Documentation & Lineage Graph:** [View Lineage Site](https://austinjnrishere.github.io/your-repo-name/)
+
+
+
+
